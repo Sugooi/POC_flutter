@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'camerascreen/camera_screen.dart';
 
 void main() => runApp(MyApp());
@@ -12,7 +13,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class FirstRoute extends StatelessWidget {
+class FirstRoute extends StatefulWidget {
+  @override
+  FirstRouteState createState() => FirstRouteState();
+}
+
+class FirstRouteState extends State<FirstRoute> {
+  static const platform = const MethodChannel('flutter.sugoi.channel');
+  String _output = 'No output';
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -53,18 +61,33 @@ class FirstRoute extends StatelessWidget {
                   height: 30,
                 ),
                 RaisedButton(
-                  onPressed: () {},
+                  onPressed: _commNative,
                   color: Color(0xFF607D8B),
                   child: Text(
                     'Communicate with Native',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
+                Text(_output),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<Null> _commNative() async {
+    String output;
+    try {
+      final String result = await platform.invokeMethod('sayHello');
+      output = result;
+    } on PlatformException catch (e) {
+      output = "Failed to get message back '${e.message}'.";
+    }
+
+    setState(() {
+      _output = output;
+    });
   }
 }
